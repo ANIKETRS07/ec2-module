@@ -30,10 +30,10 @@ resource "aws_security_group" "this" {
     Name = "${var.instance_name}-sg"
   })
 
-  lifecycle {
+    lifecycle {
     create_before_destroy = true
+    ignore_changes        = [name, description]
   }
-}
 
 resource "aws_instance" "this" {
   ami                    = var.ami_id
