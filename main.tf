@@ -14,6 +14,7 @@ resource "aws_security_group" "this" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
+
     # Restrict SSH to VPC CIDR in prod; open in dev/uat
     cidr_blocks = var.environment == "prod" ? [var.vpc_cidr] : ["0.0.0.0/0"]
   }
@@ -28,13 +29,18 @@ resource "aws_security_group" "this" {
   tags = merge(var.tags, {
     Name = "${var.instance_name}-sg"
   })
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_instance" "this" {
-  ami                     = var.ami_id
-  instance_type           = var.instance_type
-  subnet_id               = var.subnet_id
-  vpc_security_group_ids  = [aws_security_group.this.id]
+  ami                    = var.ami_id
+  instance_type          = var.instance_type
+  subnet_id              = var.subnet_id
+  vpc_security_group_ids = [aws_security_group.this.id]
+
   disable_api_termination = var.environment == "prod" ? true : false
 
   tags = merge(var.tags, {
